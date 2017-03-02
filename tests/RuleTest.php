@@ -1,6 +1,8 @@
 <?php
 
 use Mockery as m;
+
+use Authority\Authority;
 use Authority\Rule;
 
 class RuleTest extends PHPUnit_Framework_TestCase
@@ -8,6 +10,7 @@ class RuleTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->rule = new Rule(true, 'read', m::mock('Obj'));
+        $this->auth = new Authority(new stdClass);
     }
 
     public function tearDown()
@@ -64,13 +67,13 @@ class RuleTest extends PHPUnit_Framework_TestCase
         $object2->id = 2;
 
         $rule = new Rule(true, 'read', 'stdClass', function($obj) { return $obj->id == 1; });
-        $this->assertTrue($rule->isAllowed($object1));
-        $this->assertFalse($rule->isAllowed($object2));
+        $this->assertTrue($rule->isAllowed($this->auth, $object1));
+        $this->assertFalse($rule->isAllowed($this->auth, $object2));
 
         $rule->when(function($obj) { return 1 == 2; });
 
-        $this->assertFalse($rule->isAllowed($object1));
-        $this->assertFalse($rule->isAllowed($object2));
+        $this->assertFalse($rule->isAllowed($this->auth, $object1));
+        $this->assertFalse($rule->isAllowed($this->auth, $object2));
     }
 
     public function testCanSetAndCheckRestrictionAgainstConditions()
@@ -81,20 +84,19 @@ class RuleTest extends PHPUnit_Framework_TestCase
         $object2 = new stdClass;
         $object2->id = 2;
 
-        $rule = new Rule(false, 'read', 'stdClass', function($obj) {
-            return $obj->id == 1;
-        });
-        $this->assertFalse($rule->isAllowed($object1));
-        $this->assertTrue($rule->isAllowed($object2));
+        $rule = new Rule(false, 'read', 'stdClass', function($obj) { return $obj->id == 1; });
+
+        $this->assertFalse($rule->isAllowed($this->auth, $object1));
+        $this->assertTrue($rule->isAllowed($this->auth, $object2));
 
         $rule->when(function($obj) { return 1 == 2; });
 
-        $this->assertFalse($rule->isAllowed($object1));
-        $this->assertTrue($rule->isAllowed($object2));
+        $this->assertFalse($rule->isAllowed($this->auth, $object1));
+        $this->assertTrue($rule->isAllowed($this->auth, $object2));
 
         $rule->when(function($obj) { return 1 == 1; });
 
-        $this->assertFalse($rule->isAllowed($object1));
-        $this->assertFalse($rule->isAllowed($object2));
+        $this->assertFalse($rule->isAllowed($this->auth, $object1));
+        $this->assertFalse($rule->isAllowed($this->auth, $object2));
     }
 }

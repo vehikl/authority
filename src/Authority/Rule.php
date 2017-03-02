@@ -6,6 +6,8 @@
  */
 namespace Authority;
 
+use Closure;
+
 /**
  * Rule instances can represent and evaluate themselves
  *
@@ -55,16 +57,29 @@ class Rule
 
         if ($this->isPrivilege()) {
             $allow = array_reduce($this->conditions, function($results, $condition) use ($args) {
+                $authority = $args[0];
+                $args[0]   = $args[1];
+                unset($args[1]);
+
+                $condition = Closure::bind($condition, $authority);
+
                 return $results && call_user_func_array($condition, $args);
             }, true);
         } else {
             $allow = false;
             if ($this->conditions) {
                 $allow = ! array_reduce($this->conditions, function($results, $condition) use ($args) {
+                    $authority = $args[0];
+                    $args[0]   = $args[1];
+                    unset($args[1]);
+
+                    $condition = Closure::bind($condition, $authority);
+
                     return $results || call_user_func_array($condition, $args);
                 }, false);
             }
         }
+
         return $allow;
     }
 

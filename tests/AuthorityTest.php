@@ -117,12 +117,12 @@ class AuthorityTest extends PHPUnit_Framework_TestCase
         $user2 = new stdClass;
         $user2->id = 2;
 
-        $this->auth->allow('comment', 'User', function ($self, $a_user) {
-            return $self->getCurrentUser()->id == $a_user->id;
+        $this->auth->allow('comment', 'User', function ($a_user) {
+            return $this->getCurrentUser()->id == $a_user->id;
         });
 
-        $this->auth->deny('read', 'User', function ($self, $a_user) {
-            return $self->getCurrentUser()->id != $a_user->id;
+        $this->auth->deny('read', 'User', function ($a_user) {
+            return $this->getCurrentUser()->id != $a_user->id;
         });
 
         $this->assertFalse($this->auth->can('comment', $user));
@@ -135,12 +135,12 @@ class AuthorityTest extends PHPUnit_Framework_TestCase
     {
         $user = $this->user;
 
-        $this->auth->allow('comment', 'User', function ($self, $a_user) {
-            return $self->getCurrentUser()->id != $a_user->id;
+        $this->auth->allow('comment', 'User', function ($a_user) {
+            return $this->getCurrentUser()->id != $a_user->id;
         });
 
         $this->auth->allow('comment', 'User');
 
-        $this->assertFalse($this->auth->can('comment', $user));
+        $this->assertTrue($this->auth->can('comment', 'User', $user));
     }
 }

@@ -6,6 +6,8 @@
  */
 namespace Authority;
 
+use Closure;
+
 /**
  * Authority allows for establishing rules to check against for authorization
  *
@@ -71,7 +73,12 @@ class Authority
      */
     public function can($action, $resource, $resourceValue = null)
     {
-        $self = $this;
+        $reducer = function($result, $rule) use ($resourceValue) {
+            return $result && $rule->isAllowed($this, $resourceValue);
+        };
+
+        $reducer = Closure::bind($reducer, $this);
+
         if ( ! is_string($resource)) {
             $resourceValue = $resource;
             $resource = get_class($resourceValue);
@@ -80,14 +87,12 @@ class Authority
         $rules = $this->getRulesFor($action, $resource);
 
         if (! $rules->isEmpty()) {
-            $allowed = array_reduce($rules->all(), function($result, $rule) use ($self, $resourceValue) {
-                return $result && $rule->isAllowed($self, $resourceValue);
-            }, true);
+            $allowed = array_reduce($rules->all(), $reducer, true);
 
             $myRules = $rules->all();
             $last = end($myRules);
 
-            $allowed = $allowed || $last->isAllowed($self, $resourceValue);
+            $allowed = $allowed || $last->isAllowed($this, $resourceValue);
         } else {
             $allowed = false;
         }
