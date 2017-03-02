@@ -1,5 +1,5 @@
 {
-    "name": "machuga/authority",
+    "name": "vehikl/authority",
     "description": "A simple and flexible authorization system for PHP",
     "license": "mit",
     "authors": [
@@ -28,11 +28,6 @@
     "autoload": {
         "psr-0": {
             "Authority": "src/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.1.x-dev"
         }
     }
 }
