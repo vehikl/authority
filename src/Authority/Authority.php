@@ -73,16 +73,19 @@ class Authority
      */
     public function can($action, $resource, $resourceValue = null)
     {
+        if ( ! is_string($resource)) {
+            if (is_null($resourceValue)) {
+                $resourceValue = $resource;
+            }
+
+            $resource = get_class($resource);
+        }
+
         $reducer = function($result, $rule) use ($resourceValue) {
             return $result && $rule->isAllowed($this, $resourceValue);
         };
 
         $reducer = Closure::bind($reducer, $this);
-
-        if ( ! is_string($resource)) {
-            $resourceValue = $resource;
-            $resource = get_class($resourceValue);
-        }
 
         $rules = $this->getRulesFor($action, $resource);
 
