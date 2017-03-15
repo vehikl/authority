@@ -71,7 +71,7 @@ class Authority
      *
      * @return boolean
      */
-    public function can($action, $resource, $resourceValue = null)
+    public function can($action, $resource, ...$resourceValue)
     {
         $reducer = function($result, $rule) use ($resourceValue) {
             return $result && $rule->isAllowed($this, $resourceValue);
