@@ -67,14 +67,33 @@ class RuleTest extends PHPUnit_Framework_TestCase
         $object2->id = 2;
 
         $rule = new Rule(true, 'read', 'stdClass', function($obj) { return $obj->id == 1; });
-        $this->assertTrue($rule->isAllowed($this->auth, $object1));
-        $this->assertFalse($rule->isAllowed($this->auth, $object2));
+        $this->assertTrue($rule->isAllowed($this->auth, [$object1]));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object2]));
 
         $rule->when(function($obj) { return 1 == 2; });
 
-        $this->assertFalse($rule->isAllowed($this->auth, $object1));
-        $this->assertFalse($rule->isAllowed($this->auth, $object2));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object1]));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object2]));
     }
+
+    public function testCanSetAndCheckPrivilegeAgainstMultipleConditions()
+    {
+        $object1 = new stdClass;
+        $object1->id = 1;
+
+        $object2 = new stdClass;
+        $object2->id = 2;
+
+        $rule = new Rule(true, 'read', 'stdClass', function($obj1, $obj2) { return $obj1->id == 1 && $obj2->id == 2; });
+        $params = [$object1, $object2];
+        $this->assertTrue($rule->isAllowed($this->auth, $params));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object1, new class() { public $id = 3; }]));
+
+        $rule->when(function($obj) { return 1 == 2; });
+
+        $this->assertFalse($rule->isAllowed($this->auth, $params));
+    }
+
 
     public function testCanSetAndCheckRestrictionAgainstConditions()
     {
@@ -86,17 +105,17 @@ class RuleTest extends PHPUnit_Framework_TestCase
 
         $rule = new Rule(false, 'read', 'stdClass', function($obj) { return $obj->id == 1; });
 
-        $this->assertFalse($rule->isAllowed($this->auth, $object1));
-        $this->assertTrue($rule->isAllowed($this->auth, $object2));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object1]));
+        $this->assertTrue($rule->isAllowed($this->auth, [$object2]));
 
         $rule->when(function($obj) { return 1 == 2; });
 
-        $this->assertFalse($rule->isAllowed($this->auth, $object1));
-        $this->assertTrue($rule->isAllowed($this->auth, $object2));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object1]));
+        $this->assertTrue($rule->isAllowed($this->auth, [$object2]));
 
         $rule->when(function($obj) { return 1 == 1; });
 
-        $this->assertFalse($rule->isAllowed($this->auth, $object1));
-        $this->assertFalse($rule->isAllowed($this->auth, $object2));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object1]));
+        $this->assertFalse($rule->isAllowed($this->auth, [$object2]));
     }
 }

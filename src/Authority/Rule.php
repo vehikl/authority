@@ -63,7 +63,7 @@ class Rule
 
                 $condition = Closure::bind($condition, $authority);
 
-                return $results && call_user_func_array($condition, $args);
+                return $results && call_user_func_array($condition, ...$args);
             }, true);
         } else {
             $allow = false;
@@ -75,7 +75,7 @@ class Rule
 
                     $condition = Closure::bind($condition, $authority);
 
-                    return $results || call_user_func_array($condition, $args);
+                    return $results || call_user_func_array($condition, ...$args);
                 }, false);
             }
         }

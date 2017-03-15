@@ -71,7 +71,7 @@ class Authority
      *
      * @return boolean
      */
-    public function can($action, $resource, $resourceValue = null)
+    public function can($action, $resource, ...$resourceValue)
     {
         if ( ! is_string($resource)) {
             if (is_null($resourceValue)) {
